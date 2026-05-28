@@ -1,47 +1,76 @@
 #!/usr/bin/env python3
-"""Fetch citation count from Google Scholar and update index.html."""
+"""Fetch citation counts from Google Scholar and update index.html."""
 import re
 import sys
 
 SCHOLAR_ID = "0O-NG5YAAAAJ"
+BAYESPRISM_KEYWORD = "bayesprism"
 
-def get_citations():
-    try:
-        from scholarly import scholarly
-        author = scholarly.search_author_id(SCHOLAR_ID)
-        scholarly.fill(author, sections=["basics"])
-        return int(author.get("citedby", 0))
-    except Exception as e:
-        print(f"scholarly failed: {e}", file=sys.stderr)
-        return None
 
-def update_html(citations):
+def get_author_data():
+    from scholarly import scholarly
+    author = scholarly.search_author_id(SCHOLAR_ID)
+    scholarly.fill(author, sections=["basics", "publications"])
+    return author
+
+
+def get_citations(author):
+    return int(author.get("citedby", 0))
+
+
+def get_bayesprism_citations(author):
+    for pub in author.get("publications", []):
+        title = pub.get("bib", {}).get("title", "").lower()
+        if BAYESPRISM_KEYWORD in title:
+            try:
+                from scholarly import scholarly
+                filled = scholarly.fill(pub)
+                return int(filled.get("num_citations", 0))
+            except Exception as e:
+                print(f"Could not fill BayesPrism pub: {e}", file=sys.stderr)
+                return int(pub.get("num_citations", 0))
+    print("BayesPrism publication not found in author list.", file=sys.stderr)
+    return None
+
+
+def update_html(total_citations, bayesprism_citations):
     path = "index.html"
     with open(path, "r", encoding="utf-8") as f:
         content = f.read()
+    changed = False
 
-    # Match the citations stat card value
-    pattern = r'(<div class="font-display text-2xl font-bold text-indigo-400">)([\d,]+)(</div>\s*\n\s*<div class="text-xs text-slate-500 mt-0\.5">Citations)'
-    replacement = rf'\g<1>{citations:,}\3'
-    new_content, count = re.subn(pattern, replacement, content)
+    pattern1 = r'(<div class="font-display text-2xl font-bold text-indigo-400">)([\d,]+)(</div>\s*\n\s*<div class="text-xs text-slate-500 mt-0\.5">Citations)'
+    new_content, n = re.subn(pattern1, rf'\g<1>{total_citations:,}\3', content)
+    if n == 0:
+        print("Total-citations pattern not found.", file=sys.stderr)
+    elif new_content != content:
+        print(f"Updated total citations to {total_citations:,}.")
+        changed = True
+    content = new_content
 
-    if count == 0:
-        print("Pattern not found in index.html — skipping update.", file=sys.stderr)
-        return False
+    if bayesprism_citations is not None:
+        pattern2 = r'(<span class="bayesprism-citations">)([\d,]+)(</span>)'
+        new_content, n = re.subn(pattern2, rf'\g<1>{bayesprism_citations:,}\3', content)
+        if n == 0:
+            print("BayesPrism-citations span not found.", file=sys.stderr)
+        elif new_content != content:
+            print(f"Updated BayesPrism citations to {bayesprism_citations:,}.")
+            changed = True
+        content = new_content
 
-    if new_content == content:
-        print(f"Citations already up to date ({citations:,}).")
-        return False
+    if changed:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+    return changed
 
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(new_content)
-
-    print(f"Updated citations to {citations:,}.")
-    return True
 
 if __name__ == "__main__":
-    citations = get_citations()
-    if citations is None:
-        print("Could not retrieve citation count — skipping.")
-        sys.exit(0)  # Don't fail CI
-    update_html(citations)
+    try:
+        author = get_author_data()
+        total = get_citations(author)
+        bp = get_bayesprism_citations(author)
+        print(f"Total citations: {total}, BayesPrism: {bp}")
+        update_html(total, bp)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(0)
