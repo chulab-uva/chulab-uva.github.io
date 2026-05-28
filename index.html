@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chu Lab · UVA Genome Sciences</title>
+  <meta name="description" content="The Chu Lab at the University of Virginia develops statistical learning and machine learning methods to decode cell–cell communication, tissue dynamics, and gene regulation." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <style>
+    .gradient-text {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glow-blue { box-shadow: 0 0 40px rgba(56,189,248,0.18); }
+    .grad-border {
+      background: linear-gradient(#0f172a, #0f172a) padding-box,
+                  linear-gradient(135deg, rgba(56,189,248,0.35), rgba(129,140,248,0.35)) border-box;
+      border: 1px solid transparent;
+    }
+    .grad-border-subtle {
+      background: linear-gradient(#111827, #111827) padding-box,
+                  linear-gradient(135deg, rgba(56,189,248,0.15), rgba(129,140,248,0.15)) border-box;
+      border: 1px solid transparent;
+    }
+    .hero-bg {
+      background:
+        radial-gradient(ellipse at 15% 55%, rgba(56,189,248,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(129,140,248,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 90%, rgba(16,185,129,0.04) 0%, transparent 40%),
+        #080e1d;
+    }
+    .section-sep { background: linear-gradient(90deg, transparent, rgba(56,189,248,0.25), transparent); height: 1px; }
+    .badge-nature  { background: rgba(6,78,59,0.6);  color: #6ee7b7; border: 1px solid rgba(52,211,153,0.2); }
+    .badge-cell    { background: rgba(127,29,29,0.6); color: #fca5a5; border: 1px solid rgba(248,113,113,0.2); }
+    .badge-science { background: rgba(30,58,138,0.6); color: #93c5fd; border: 1px solid rgba(96,165,250,0.2); }
+    .badge-other   { background: rgba(49,46,129,0.6); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.2); }
+    .badge-preprint{ background: rgba(55,65,81,0.6);  color: #d1d5db; border: 1px solid rgba(156,163,175,0.2); }
+    .card-hover { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(56,189,248,0.10); }
+    nav { transition: background 0.3s, box-shadow 0.3s; }
+    @keyframes pulse-ring { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.6; transform:scale(1.3); } }
+    .pulse-dot { animation: pulse-ring 2s ease-in-out infinite; }
+    @keyframes float-down { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(7px); } }
+    .float-down { animation: float-down 2s ease-in-out infinite; }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    .shimmer-text {
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #38bdf8);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+    code { font-family: 'Fira Code', 'Courier New', monospace; }
+  </style>
+</head>
+<body class="bg-[#080e1d] text-slate-200 font-sans antialiased">
+
+<!-- ═══════════════════════════════════ NAV ═══════════════════════════════════ -->
+<nav id="navbar" class="fixed top-0 w-full z-50" style="backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="#home" class="font-display text-xl font-bold flex items-center gap-2">
+      <span class="gradient-text">Chu Lab</span>
+      <span class="text-slate-600 text-xs font-normal hidden sm:inline">@ UVA Genome Sciences</span>
+    </a>
+    <div class="hidden md:flex items-center gap-7 text-sm font-medium">
+      <a href="#research"     class="text-slate-400 hover:text-sky-300 transition-colors">Research</a>
+      <a href="#publications" class="text-slate-400 hover:text-sky-300 transition-colors">Publications</a>
+      <a href="#software"     class="text-slate-400 hover:text-sky-300 transition-colors">Software</a>
+      <a href="#team"         class="text-slate-400 hover:text-sky-300 transition-colors">Team</a>
+      <a href="#join"         class="px-4 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/40 text-sky-300 hover:bg-sky-500/25 transition-colors font-semibold">
+        Join Us
+      </a>
+    </div>
+    <button id="menu-btn" class="md:hidden text-slate-400 hover:text-white transition-colors">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden px-6 pb-5 pt-2 flex flex-col gap-4 text-sm bg-[#080e1d]/98 border-t border-slate-800">
+    <a href="#research"     class="text-slate-400 hover:text-sky-300 py-1">Research</a>
+    <a href="#publications" class="text-slate-400 hover:text-sky-300 py-1">Publications</a>
+    <a href="#software"     class="text-slate-400 hover:text-sky-300 py-1">Software</a>
+    <a href="#team"         class="text-slate-400 hover:text-sky-300 py-1">Team</a>
+    <a href="#join"         class="text-sky-300 hover:text-sky-200 py-1 font-semibold">Join Us →</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
+<section id="home" class="hero-bg min-h-screen flex items-center pt-20">
+  <div class="max-w-6xl mx-auto px-6 py-24 w-full">
+    <div class="flex flex-col lg:flex-row items-center gap-14 lg:gap-20">
+
+      <!-- Left: text block -->
+      <div class="flex-1 space-y-7" data-aos="fade-right" data-aos-duration="800">
+        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/25 text-sky-300 text-xs font-semibold tracking-wide">
+          <span class="w-2 h-2 rounded-full bg-sky-400 pulse-dot"></span>
+          Multiple postdoc positions open · Immediate start available
+        </div>
+
+        <div>
+          <h1 class="font-display text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+            Tinyi Chu
+          </h1>
+          <p class="text-slate-400 text-xl font-medium mt-2">
+            Assistant Professor · <span class="text-slate-300">Department of Genome Sciences</span>
+          </p>
+          <p class="text-sky-400 text-base font-medium mt-1">
+            University of Virginia School of Medicine
+          </p>
+        </div>
+
+        <p class="text-slate-300 text-lg leading-relaxed max-w-xl">
+          We develop <span class="text-sky-300 font-semibold">statistical learning</span>,
+          <span class="text-indigo-300 font-semibold">Bayesian methods</span>, and
+          <span class="text-sky-300 font-semibold">deep learning</span> frameworks to decode
+          cell–cell communication, tissue dynamics, and gene regulation from single-cell and
+          spatial transcriptomics — with applications in
+          <span class="text-white font-semibold">cancer, inflammation, and tissue senescence</span>.
+        </p>
+
+        <!-- Tool pills -->
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">BayesPrism</span>
+          <span class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">SpaceFold</span>
+          <span class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">PrismSpot</span>
+          <span class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">tfTarget</span>
+          <span class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">Neural ODE</span>
+          <span class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">Spatial Omics</span>
+          <span class="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-medium">cfRNA Liquid Biopsy</span>
+        </div>
+
+        <!-- CTA buttons -->
+        <div class="flex flex-wrap gap-4 pt-2">
+          <a href="#research" class="px-6 py-3 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-sky-500/20">
+            Our Research
+          </a>
+          <a href="#join" class="px-6 py-3 border border-sky-500/40 text-sky-300 hover:bg-sky-500/10 font-semibold rounded-xl transition-colors">
+            Join the Lab
+          </a>
+          <a href="https://scholar.google.co.uk/citations?user=0O-NG5YAAAAJ&hl=en" target="_blank"
+             class="px-6 py-3 border border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500 font-semibold rounded-xl transition-colors">
+            Google Scholar ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: photo + stat cards -->
+      <div class="flex flex-col items-center gap-5 flex-shrink-0" data-aos="fade-left" data-aos-duration="800" data-aos-delay="150">
+        <!-- Photo with glow ring -->
+        <div class="relative">
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-sky-500/25 to-indigo-500/25 blur-2xl scale-110 -z-10"></div>
+          <img src="https://med.virginia.edu/faculty/wp-content/uploads/sites/45/2026/04/abk7af-229x300.jpeg"
+               alt="Dr. Tinyi Chu"
+               class="w-48 h-64 object-cover rounded-2xl border border-sky-500/25 glow-blue relative z-10" />
+        </div>
+
+        <!-- Stat chips -->
+        <div class="grid grid-cols-2 gap-3 w-64">
+          <div class="grad-border rounded-xl p-4 text-center card-hover">
+            <div class="font-display text-2xl font-bold text-sky-400">18</div>
+            <div class="text-xs text-slate-500 mt-0.5">Publications</div>
+          </div>
+          <div class="grad-border rounded-xl p-4 text-center card-hover">
+            <div class="font-display text-2xl font-bold text-indigo-400">1,863</div>
+            <div class="text-xs text-slate-500 mt-0.5">Citations</div>
+          </div>
+          <div class="grad-border rounded-xl p-4 text-center col-span-2 card-hover">
+            <div class="font-display text-sm font-bold text-emerald-400">NIH R00 · UVA Startup</div>
+            <div class="text-xs text-slate-500 mt-0.5">Active Funding</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="flex justify-center mt-20">
+      <a href="#research" class="flex flex-col items-center gap-1.5 text-slate-600 hover:text-slate-400 transition-colors">
+        <span class="text-xs uppercase tracking-[0.2em] font-medium">Explore</span>
+        <svg class="w-5 h-5 float-down" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════════════════════════════════ RESEARCH ═══════════════════════════════════ -->
+<section id="research" class="py-24 bg-[#080e1d]">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="mb-14" data-aos="fade-up">
+      <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">What We Do</p>
+      <h2 class="font-display text-4xl font-bold text-white">Research Directions</h2>
+      <p class="text-slate-400 mt-3 max-w-2xl text-base leading-relaxed">
+        We build principled computational frameworks that bridge statistical theory and biological discovery, operating across scales from molecules to tissues.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+
+      <!-- R1: Bayesian Deconvolution -->
+      <div class="grad-border rounded-2xl p-7 card-hover" data-aos="fade-up" data-aos-delay="0">
+        <div class="w-12 h-12 rounded-2xl bg-sky-500/12 border border-sky-500/25 flex items-center justify-center text-2xl mb-5">⚗️</div>
+        <h3 class="font-display text-xl font-semibold text-white mb-3">Bayesian Transcriptome Deconvolution and Gene Regulation</h3>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+          We develop statistically rigorous methods to disentangle cell-type composition and gene expression from bulk and spatial RNA-seq mixtures. Our flagship tool <strong class="text-sky-300">BayesPrism</strong> provides a fully Bayesian framework that jointly infers cell-type fractions and cell-type-specific expression — published in <em>Nature Cancer</em> 2022, where it has become the <strong class="text-sky-300">most-cited primary research paper</strong> in the journal since 2022, reflecting its broad adoption for tumor microenvironment analysis. Ongoing work extends BayesPrism into a next-generation deconvolution architecture that integrates <strong class="text-sky-300">eQTL modeling</strong> to characterize cell type-specific genetic effects and gene regulatory programs — including cis-eQTL dissection — bridging transcriptome deconvolution with population-level genetic analysis.
+        </p>
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full font-medium">Nature Cancer 2022</span>
+          <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full font-medium">Nature Genetics 2022</span>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-900/30 text-sky-300 border border-sky-500/20">Ongoing</span>
+        </div>
+        <!-- Figure -->
+        <div class="rounded-xl overflow-hidden bg-white/95 p-2 flex items-center justify-center">
+          <img src="figures/fig_bayesprism.png" alt="BayesPrism algorithm: scRNA-seq + bulk RNA-seq → joint posterior → deconvolved cell-type fractions and gene expression"
+               class="w-full object-contain max-h-44" />
+        </div>
+        <p class="text-slate-600 text-xs mt-2 italic">BayesPrism: scRNA-seq + bulk RNA-seq → joint posterior P(U,μ|φ,X) → deconvolved cell-type fractions &amp; gene expression per sample.</p>
+      </div>
+
+      <!-- R2: Spatial Transcriptomics -->
+      <div class="grad-border rounded-2xl p-7 card-hover" data-aos="fade-up" data-aos-delay="100">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-500/12 border border-indigo-500/25 flex items-center justify-center text-2xl mb-5">🗺️</div>
+        <h3 class="font-display text-xl font-semibold text-white mb-3">Spatial Transcriptomics and Cell–Cell Interaction Modeling</h3>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+          Tissues are not homogeneous — spatial context fundamentally shapes cell identity and behavior. We build methods that extract high-resolution gene expression cartography (<strong class="text-indigo-300">SpaceFold</strong>), identify spatially variable gene programs within specific cell types (<strong class="text-indigo-300">PrismSpot</strong>), and decode tissue microenvironments. Ongoing work develops <strong class="text-indigo-300">deep learning frameworks</strong> to model cell–cell interactions directly from spatial transcriptomics data, capturing ligand–receptor signaling, paracrine communication, and niche-dependent gene regulation across complex tissues.
+        </p>
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span class="badge-cell   text-xs px-2.5 py-0.5 rounded-full font-medium">Cell Stem Cell 2022</span>
+          <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full font-medium">Nature Cancer 2024</span>
+          <span class="badge-science text-xs px-2.5 py-0.5 rounded-full font-medium">Science Immunology 2022</span>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-900/30 text-indigo-300 border border-indigo-500/20">Ongoing</span>
+        </div>
+        <!-- Figures -->
+        <div class="space-y-2">
+          <div class="rounded-xl overflow-hidden bg-white/95 p-2 flex items-center justify-center">
+            <img src="figures/fig_spacefold_lower.jpg" alt="SpaceFold: spatial transcriptomics deconvolution maps 30+ cell types along the crypt–villus axis"
+                 class="w-full object-contain max-h-36" />
+          </div>
+          <div class="rounded-xl overflow-hidden bg-white/95 p-1.5 flex items-center justify-center">
+            <img src="figures/fig_prismspot.png" alt="PrismSpot: BayesPrism + Hotspot → spatially variable gene modules within cell types"
+                 class="w-full object-contain max-h-32" />
+          </div>
+        </div>
+        <p class="text-slate-600 text-xs mt-2 italic">Top: SpaceFold maps 30+ cell types along the crypt–villus axis (Cell Stem Cell 2022). Bottom: PrismSpot identifies spatially variable gene programs within specific cell types (Nature Cancer 2024).</p>
+      </div>
+
+      <!-- R3: cfRNA -->
+      <div class="grad-border rounded-2xl p-7 card-hover" data-aos="fade-up" data-aos-delay="200">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/12 border border-emerald-500/25 flex items-center justify-center text-2xl mb-5">💧</div>
+        <h3 class="font-display text-xl font-semibold text-white mb-3">Cell-free RNA &amp; Liquid Biopsy</h3>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+          Cell-free RNA circulating in blood and urine carries molecular signatures of organ health. We develop statistical methods to infer cell-type origin from cfRNA, enabling non-invasive monitoring of organ-specific damage — demonstrated in hematopoietic stem cell transplantation and immune complications. This work carries <strong class="text-emerald-300">significant translational potential</strong>: a simple blood or urine draw could replace invasive biopsies for monitoring transplant rejection, early cancer detection, and inflammatory organ injury across multiple diseases. Ongoing work expands into multimodal integration of cfRNA, cfDNA, and clinical variables, and develops methods to overcome the unique sparsity and distributional challenges inherent to liquid biopsy data.
+        </p>
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span class="badge-preprint text-xs px-2.5 py-0.5 rounded-full font-medium">medRxiv 2024</span>
+          <span class="badge-preprint text-xs px-2.5 py-0.5 rounded-full font-medium">Under Review 2024</span>
+        </div>
+        <!-- Figures: 2×2 grid, cartoon + fractions first -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="rounded-xl overflow-hidden bg-white/95 p-2 flex items-center justify-center" style="min-height:110px">
+            <img src="figures/fig_cfrna_cartoon.jpg" alt="cfRNA prism cartoon: blood RNA → cell type origin"
+                 class="w-full h-full object-contain max-h-32" />
+          </div>
+          <div class="rounded-xl overflow-hidden bg-white/95 p-1.5 flex items-center justify-center" style="min-height:110px">
+            <img src="figures/fig_cfrna_fractions.png" alt="cfRNA cell type fraction changes over HSCT timeline"
+                 class="w-full h-full object-contain max-h-32" />
+          </div>
+          <div class="rounded-xl overflow-hidden bg-white/95 p-1.5 flex items-center justify-center" style="min-height:110px">
+            <img src="figures/fig_cfrna_timeline.png" alt="cfRNA distance from health distinguishes disease from recovery"
+                 class="w-full h-full object-contain max-h-32" />
+          </div>
+          <div class="rounded-xl overflow-hidden bg-white/95 p-1.5 flex items-center justify-center" style="min-height:110px">
+            <img src="figures/fig_cfrna_damage.png" alt="cfRNA cell-type origin reveals organ-specific damage"
+                 class="w-full h-full object-contain max-h-32" />
+          </div>
+        </div>
+        <p class="text-slate-600 text-xs mt-2 italic">Top-left: cfRNA carries multi-organ cell-type signatures. Top-right: cell-type fractions shift dynamically across transplant phases. Bottom: distance-from-health metric predicts complications; cell-type origin pinpoints damaged organs.</p>
+      </div>
+
+      <!-- R4: Dynamics -->
+      <div class="grad-border rounded-2xl p-7 card-hover" data-aos="fade-up" data-aos-delay="300">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/12 border border-orange-500/25 flex items-center justify-center text-2xl mb-5">〜</div>
+        <h3 class="font-display text-xl font-semibold text-white mb-3">Modeling the Dynamics of Cell State Transitions</h3>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+          Gene expression is a dynamic process, yet most methods only analyze steady-state snapshots. We are developing <strong class="text-orange-300">physics-informed neural networks</strong> and <strong class="text-orange-300">Neural ODE</strong> frameworks that learn the governing dynamics of gene regulatory networks from perturbation data — CRISPRi/a screens, cytokine treatments, spatial gradients, and time-series single-cell experiments. The ultimate goal is to identify <strong class="text-orange-300">causal regulators</strong> of cell state transitions: moving beyond correlation to pinpoint the master transcription factors and signaling nodes that drive or block specific cell fates, enabling rational design of <em>in silico</em> perturbations and virtual cell experiments.
+        </p>
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-900/30 text-orange-300 border border-orange-500/20">NeurIPS / ICML Scope</span>
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-900/30 text-orange-300 border border-orange-500/20">Perturbation Genomics</span>
+        </div>
+        <!-- Figure -->
+        <div class="rounded-xl overflow-hidden flex items-center justify-center mt-1">
+          <img src="figures/fig_dynamics_render.png" alt="Time-series perturbation data (T1→T2→T3) → Neural ODE dx/dt=f(x) → infer gene regulatory dynamics"
+               class="w-full object-contain rounded-xl max-h-52" style="background:#080e1d" />
+        </div>
+        <p class="text-slate-600 text-xs mt-2 italic">Time-series / perturbation single-cell data (T1→T2→T3) → Neural ODE dx/dt=f(x) → infer gene regulatory dynamics and predict perturbation responses.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════════════════════════════════ PUBLICATIONS ═══════════════════════════════════ -->
+<section id="publications" class="py-24 bg-[#060b18]">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="mb-14" data-aos="fade-up">
+      <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">Selected Works</p>
+      <h2 class="font-display text-4xl font-bold text-white">Publications</h2>
+      <p class="text-slate-500 mt-3 text-sm">
+        † Corresponding author &nbsp;·&nbsp; * Co-first author &nbsp;·&nbsp;
+        <a href="https://scholar.google.co.uk/citations?user=0O-NG5YAAAAJ&hl=en" target="_blank" class="text-sky-400 hover:underline">Full list on Google Scholar ↗</a>
+      </p>
+    </div>
+
+    <!-- Section: Statistical Methods -->
+    <div class="mb-12" data-aos="fade-up">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-1 h-6 rounded-full bg-sky-500"></div>
+        <h3 class="font-display text-base font-semibold text-sky-400 uppercase tracking-wider">Statistical Learning &amp; Computational Methods</h3>
+      </div>
+      <div class="space-y-3">
+
+        <!-- BayesPrism ⭐ -->
+        <div class="grad-border rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="0">
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-0.5">
+              <span class="text-yellow-400 text-lg">★</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-slate-200 text-sm leading-relaxed">
+                <strong class="text-white">Chu, T.*†</strong>, Wang, Z., Pe'er, D. &amp; Danko, C.G.† (2022).
+                Cell type and gene expression deconvolution with BayesPrism enables Bayesian integrative analysis across bulk and single-cell RNA sequencing in oncology.
+                <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Nature Cancer</span>
+                <span class="ml-2 text-xs text-yellow-500/70 italic">— Selected in Nature Cancer 2022 in Review Focus</span>
+              </p>
+              <a href="https://doi.org/10.1038/s43018-022-00356-3" target="_blank"
+                 class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1038/s43018-022-00356-3 ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ChRO-seq Nature Genetics 2018 ⭐ -->
+        <div class="grad-border rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="40">
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-0.5">
+              <span class="text-yellow-400 text-lg">★</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-slate-200 text-sm leading-relaxed">
+                <strong class="text-white">Chu, T.</strong>, Rice, E.J., Booth, G.T., Salamanca, H.H., Wang, Z., Core, L.J., …, Kwak, H. &amp; Danko, C.G. (2018).
+                Chromatin run-on and sequencing maps the transcriptional regulatory landscape of glioblastoma multiforme.
+                <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Nature Genetics</span>
+              </p>
+              <a href="https://doi.org/10.1038/s41588-018-0244-3" target="_blank"
+                 class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1038/s41588-018-0244-3 ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Histone Nature Genetics 2022 -->
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="80">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Wang, Z., Chivu, A.G., Choate, L.A., Rice, E.J., Miller, D.C., <strong class="text-white">Chu, T.</strong>, …, Danko, C.G. (2022).
+            Prediction of histone post-translational modification patterns based on nascent transcription data.
+            <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Nature Genetics</span>
+          </p>
+          <a href="https://doi.org/10.1038/s41588-022-01026-x" target="_blank"
+             class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1038/s41588-022-01026-x ↗</a>
+        </div>
+
+        <!-- tfTarget -->
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="120">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Wang, N., Wang, Z., Danko, C.G. &amp; <strong class="text-white">Chu, T.†</strong> (2022).
+            Mapping transcription regulation with run-on and sequencing data using the web-based tfTarget gateway.
+            <span class="badge-other text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Methods in Molecular Biology</span>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Spatial / Cancer Biology -->
+    <div class="mb-12" data-aos="fade-up">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-1 h-6 rounded-full bg-indigo-500"></div>
+        <h3 class="font-display text-base font-semibold text-indigo-400 uppercase tracking-wider">Spatial Transcriptomics &amp; Cancer Biology</h3>
+      </div>
+      <div class="space-y-3">
+
+        <!-- SpaceFold / Cell Stem Cell ⭐ -->
+        <div class="grad-border rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="0">
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-0.5">
+              <span class="text-yellow-400 text-lg">★</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-slate-200 text-sm leading-relaxed">
+                Niec, R.E.*, <strong class="text-white">Chu, T.*</strong>, Gur-Cohen, S.*, Schernthanner, M.*, Hidalgo, L., Kataru, R., …, Pe'er, D. &amp; Fuchs, E. (2022).
+                Lymphatics act as a signaling hub to regulate intestinal stem cell activity.
+                <span class="badge-cell text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Cell Stem Cell</span>
+              </p>
+              <a href="https://doi.org/10.1016/j.stem.2022.05.007" target="_blank"
+                 class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1016/j.stem.2022.05.007 ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- PrismSpot / Nature Cancer 2024 ⭐ -->
+        <div class="grad-border rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="40">
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 mt-0.5">
+              <span class="text-yellow-400 text-lg">★</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-slate-200 text-sm leading-relaxed">
+                Romero, R., <strong class="text-white">Chu, T.</strong>, González-Robles, T.J., Smith, P., Xie, Y., Kaur, H., …, Pe'er, D. &amp; Sawyers, C.L. (2024).
+                The neuroendocrine transition in prostate cancer is dynamic and dependent on ASCL1.
+                <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Nature Cancer</span>
+              </p>
+              <a href="https://doi.org/10.1038/s43018-024-00838-6" target="_blank"
+                 class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1038/s43018-024-00838-6 ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Science Immunology -->
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="80">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Castillo, R.L.*, Sidhu, I.*, Dolgalev, I.*, <strong class="text-white">Chu, T.</strong>, et al. (2022).
+            Spatial transcriptomics stratifies health and psoriatic disease severity by emergent cellular ecosystems.
+            <span class="badge-science text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Science Immunology</span>
+          </p>
+          <a href="https://doi.org/10.1126/sciimmunol.abq7991" target="_blank"
+             class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1126/sciimmunol.abq7991 ↗</a>
+        </div>
+
+        <!-- Nature Immunology -->
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="120">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Glasner, A., Rose, S.A., Sharma, R., Gudjonson, H., <strong class="text-white">Chu, T.</strong>, et al. (2023).
+            Conserved transcriptional connectivity of regulatory T cells in the tumor microenvironment informs novel combination cancer therapy strategies.
+            <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Nature Immunology</span>
+          </p>
+          <a href="https://doi.org/10.1038/s41590-023-01504-2" target="_blank"
+             class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1038/s41590-023-01504-2 ↗</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: cfRNA -->
+    <div class="mb-12" data-aos="fade-up">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-1 h-6 rounded-full bg-emerald-500"></div>
+        <h3 class="font-display text-base font-semibold text-emerald-400 uppercase tracking-wider">Cell-free RNA &amp; Liquid Biopsy</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Loy, C., Cheng, M.P., Gonzalez-Bocco, I.H., Lenz, J., Belcher, E., Bliss, A., Eweis-LaBolle, D., <strong class="text-white">Chu, T.</strong>, Ritz, J. &amp; De Vlaminck, I. (2024).
+            Cell-free RNA liquid biopsy to monitor hematopoietic stem cell transplantation.
+            <span class="badge-preprint text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">medRxiv 2024</span>
+          </p>
+          <a href="https://doi.org/10.1101/2024.05.15.24307448" target="_blank"
+             class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1101/2024.05.15.24307448 ↗</a>
+        </div>
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="40">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Mzava, O., Loy, C.J., Gonzalez-Bocco, I.H., …, <strong class="text-white">Chu, T.</strong>, Cheng, M.P., Ritz, J., Gupta, S. &amp; De Vlaminck, I. (2024).
+            Urine cell-free RNA versus plasma cell-free RNA for monitoring of immune and urinary tract complications.
+            <span class="badge-preprint text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Under Review</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: AI / Deep Learning -->
+    <div class="mb-6" data-aos="fade-up">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-1 h-6 rounded-full bg-orange-500"></div>
+        <h3 class="font-display text-base font-semibold text-orange-400 uppercase tracking-wider">Deep Learning &amp; AI Methods</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="0">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Liu, T., <strong class="text-white">Chu, T.</strong>, Luo, X. &amp; Zhao, H. (2025).
+            Building a foundation model for drug synergy analysis powered by large language models.
+            <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Nature Communications</span>
+          </p>
+          <a href="https://doi.org/10.1038/s41467-025-59822-y" target="_blank"
+             class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1038/s41467-025-59822-y ↗</a>
+        </div>
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="40">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Liu, T., Huang, T., Jin, W., <strong class="text-white">Chu, T.</strong>, Ying, R. &amp; Zhao, H. (2026).
+            spRefine denoises and imputes spatial transcriptomics with a reference-free framework powered by genomic language model.
+            <span class="badge-nature text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Genome Research</span>
+          </p>
+          <a href="https://doi.org/10.1101/gr.281001.125" target="_blank"
+             class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1101/gr.281001.125 ↗</a>
+        </div>
+        <div class="grad-border-subtle rounded-xl p-5 card-hover" data-aos="fade-up" data-aos-delay="80">
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Wen, W., Zhong, J., Zhang, Z., Jia, L., <strong class="text-white">Chu, T.</strong>, Wang, N., Danko, C.G. &amp; Wang, Z. (2024).
+            Deep Transformer-based model dHICA enables accurate histone imputation from chromatin accessibility.
+            <span class="badge-other text-xs px-2.5 py-0.5 rounded-full ml-1.5 font-medium">Briefings in Bioinformatics</span>
+          </p>
+          <a href="https://doi.org/10.1093/bib/bbae459" target="_blank"
+             class="text-xs text-sky-400 hover:underline mt-1.5 inline-block">doi:10.1093/bib/bbae459 ↗</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════════════════════════════════ SOFTWARE ═══════════════════════════════════ -->
+<section id="software" class="py-24 bg-[#080e1d]">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="mb-14" data-aos="fade-up">
+      <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">Open Source</p>
+      <h2 class="font-display text-4xl font-bold text-white">Software</h2>
+      <p class="text-slate-400 mt-3">All tools freely available on GitHub.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <!-- BayesPrism -->
+      <a href="https://github.com/Danko-Lab/BayesPrism" target="_blank"
+         class="grad-border rounded-2xl p-6 card-hover group flex flex-col" data-aos="fade-up" data-aos-delay="0">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-sky-500/12 border border-sky-500/25 flex items-center justify-center text-xl">⚗️</div>
+          <svg class="w-4 h-4 text-slate-700 group-hover:text-sky-400 transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-lg font-semibold text-white mb-2">BayesPrism</h3>
+        <p class="text-slate-400 text-sm leading-relaxed flex-1 mb-4">Fully Bayesian deconvolution of bulk and spatial transcriptomics using single-cell references. Jointly infers cell-type fractions and cell-type-specific expression.</p>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-900/40 text-blue-300 border border-blue-500/20 self-start">R</span>
+      </a>
+
+      <!-- SpaceFold -->
+      <a href="https://github.com/dpeerlab/SpaceFold" target="_blank"
+         class="grad-border rounded-2xl p-6 card-hover group flex flex-col" data-aos="fade-up" data-aos-delay="80">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-indigo-500/12 border border-indigo-500/25 flex items-center justify-center text-xl">🗺️</div>
+          <svg class="w-4 h-4 text-slate-700 group-hover:text-sky-400 transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-lg font-semibold text-white mb-2">SpaceFold</h3>
+        <p class="text-slate-400 text-sm leading-relaxed flex-1 mb-4">Maps gene expression cartography from spatial transcriptomics for tissues with stereotypical structures, leveraging spatial regularity to achieve sub-spot resolution.</p>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-900/40 text-blue-300 border border-blue-500/20 self-start">R</span>
+      </a>
+
+      <!-- PrismSpot -->
+      <a href="https://github.com/dpeerlab/PrismSpot" target="_blank"
+         class="grad-border rounded-2xl p-6 card-hover group flex flex-col" data-aos="fade-up" data-aos-delay="160">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-orange-500/12 border border-orange-500/25 flex items-center justify-center text-xl">◈</div>
+          <svg class="w-4 h-4 text-slate-700 group-hover:text-sky-400 transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-lg font-semibold text-white mb-2">PrismSpot</h3>
+        <p class="text-slate-400 text-sm leading-relaxed flex-1 mb-4">Combines BayesPrism deconvolution with Hotspot spatial autocorrelation analysis to identify spatially variable gene programs within specific cell types.</p>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-900/40 text-blue-300 border border-blue-500/20 self-start">R</span>
+      </a>
+
+      <!-- tfTarget -->
+      <a href="https://github.com/Danko-Lab/tfTarget" target="_blank"
+         class="grad-border rounded-2xl p-6 card-hover group flex flex-col" data-aos="fade-up" data-aos-delay="0">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-emerald-500/12 border border-emerald-500/25 flex items-center justify-center text-xl">⌥</div>
+          <svg class="w-4 h-4 text-slate-700 group-hover:text-sky-400 transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-lg font-semibold text-white mb-2">tfTarget</h3>
+        <p class="text-slate-400 text-sm leading-relaxed flex-1 mb-4">Web-based gateway for mapping differentially regulated transcriptional regulatory networks from run-on sequencing data (PRO-seq / GRO-seq / ChRO-seq).</p>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-900/40 text-blue-300 border border-blue-500/20 self-start">R</span>
+      </a>
+
+      <!-- dREG -->
+      <a href="https://github.com/Danko-Lab/dREG" target="_blank"
+         class="grad-border rounded-2xl p-6 card-hover group flex flex-col" data-aos="fade-up" data-aos-delay="160">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-11 h-11 rounded-xl bg-violet-500/12 border border-violet-500/25 flex items-center justify-center text-xl">◉</div>
+          <svg class="w-4 h-4 text-slate-700 group-hover:text-sky-400 transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-lg font-semibold text-white mb-2">dREG / dREG-HD</h3>
+        <p class="text-slate-400 text-sm leading-relaxed flex-1 mb-4">Detects regulatory elements (enhancers and promoters) from GRO-seq/PRO-seq data using support vector regression on nascent transcription signals.</p>
+        <div class="flex gap-2 self-start">
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-900/40 text-blue-300 border border-blue-500/20">R</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">C</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════════════════════════════════ TEAM ═══════════════════════════════════ -->
+<section id="team" class="py-24 bg-[#060b18]">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="mb-14" data-aos="fade-up">
+      <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">The Lab</p>
+      <h2 class="font-display text-4xl font-bold text-white">Team</h2>
+    </div>
+
+    <!-- PI -->
+    <div class="grad-border rounded-2xl p-8 mb-8 card-hover" data-aos="fade-up">
+      <div class="flex flex-col md:flex-row gap-8 items-start">
+        <img src="https://med.virginia.edu/faculty/wp-content/uploads/sites/45/2026/04/abk7af-229x300.jpeg"
+             alt="Dr. Tinyi Chu"
+             class="w-36 h-48 object-cover rounded-xl border border-sky-500/20 flex-shrink-0 glow-blue" />
+        <div class="flex-1">
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="font-display text-2xl font-bold text-white">Tinyi Chu, Ph.D.</h3>
+            <span class="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 font-semibold">Principal Investigator</span>
+          </div>
+          <p class="text-sky-400 font-medium text-sm mb-4">Assistant Professor · Department of Genome Sciences · UVA School of Medicine</p>
+          <p class="text-slate-400 text-sm leading-relaxed mb-5">
+            Tinyi Chu received his Ph.D. in Computational Biology from Cornell University (minor: Computer Science / Machine Learning) and completed postdoctoral training at Memorial Sloan Kettering Cancer Center and Yale University, where he was a <strong class="text-white">Damon Runyon Quantitative Biology Postdoctoral Fellow</strong>. His research focuses on developing Bayesian and machine learning methods for single-cell and spatial transcriptomics, with applications in cancer biology and cell–cell communication. He is the lead developer of BayesPrism (<em>Nature Cancer</em> 2022, selected as 2022 in Review Focus), which has been adopted widely for tumor microenvironment analysis. His work is supported by an NIH R00 Pathway to Independence Award (NHGRI, R00HG013429) and UVA institutional startup funding.
+          </p>
+          <div class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            <a href="mailto:tchu@uva.edu" class="text-sky-400 hover:underline flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              tchu@uva.edu
+            </a>
+            <a href="https://orcid.org/0000-0003-3369-6692" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">ORCID ↗</a>
+            <a href="https://scholar.google.co.uk/citations?user=0O-NG5YAAAAJ&hl=en" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">Google Scholar ↗</a>
+            <a href="https://med.virginia.edu/faculty/faculty-listing/abk7af/" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">UVA Faculty Page ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lab forming placeholder -->
+    <div class="grad-border-subtle rounded-2xl p-8 text-center" data-aos="fade-up" data-aos-delay="100">
+      <div class="text-4xl mb-4">🔬</div>
+      <h3 class="font-display text-xl font-semibold text-white mb-2">Lab Forming — 2026</h3>
+      <p class="text-slate-400 text-sm max-w-md mx-auto mb-5">
+        We are actively recruiting postdoctoral researchers, graduate students, and undergraduates. Interested in joining a well-funded, collaborative environment at the intersection of machine learning and genomics?
+      </p>
+      <a href="#join" class="inline-block px-6 py-2.5 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-xl transition-colors text-sm">
+        See Open Positions →
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════════════════════════════════ JOIN US ═══════════════════════════════════ -->
+<section id="join" class="py-24 bg-[#080e1d]">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="mb-14" data-aos="fade-up">
+      <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">Opportunities</p>
+      <h2 class="font-display text-4xl font-bold text-white">Join the Lab</h2>
+    </div>
+
+    <!-- Hiring banner -->
+    <div class="relative overflow-hidden rounded-2xl border border-sky-500/20 p-8 mb-10"
+         style="background: linear-gradient(135deg, rgba(14,66,92,0.4) 0%, rgba(30,20,80,0.4) 100%);"
+         data-aos="fade-up">
+      <div class="absolute -top-16 -right-16 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-bold mb-5 uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-sky-400 pulse-dot"></span>
+          Multiple Positions Open · Immediate Start Available
+        </div>
+        <h3 class="font-display text-2xl lg:text-3xl font-bold text-white mb-3">
+          Postdoctoral Researcher<br/>
+          <span class="text-sky-300 shimmer-text">Computational Biology &amp; Machine Learning</span>
+        </h3>
+        <p class="text-slate-300 text-sm leading-relaxed max-w-3xl mb-6">
+          The Chu Lab is seeking multiple postdoctoral researchers to develop machine learning, generative modeling, and statistical frameworks for single-cell and spatial transcriptomics — applied to <strong class="text-white">cancer, inflammation, and tissue senescence</strong>. Candidates from purely computational backgrounds (CS, math, stats, engineering, physics) are <strong class="text-sky-200">strongly encouraged to apply</strong> — domain-specific biology knowledge can be acquired on the job.
+        </p>
+        <div class="flex flex-wrap gap-5 text-sm text-slate-300 mb-7">
+          <span class="flex items-center gap-2"><span class="text-sky-400 text-base">📍</span> Charlottesville, VA (UVA)</span>
+          <span class="flex items-center gap-2"><span class="text-sky-400 text-base">🗓️</span> Flexible start date</span>
+        </div>
+        <a href="#how-to-apply" class="inline-flex items-center gap-2 px-6 py-3 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-sky-500/20">
+          How to Apply ↓
+        </a>
+      </div>
+    </div>
+
+    <!-- PhD position card -->
+    <div class="relative overflow-hidden rounded-2xl border border-indigo-500/20 p-8 mb-10"
+         style="background: linear-gradient(135deg, rgba(30,20,80,0.4) 0%, rgba(10,30,50,0.4) 100%);"
+         data-aos="fade-up">
+      <div class="absolute -top-12 -right-12 w-56 h-56 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-bold mb-5 uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-indigo-400 pulse-dot"></span>
+          Prospective PhD Students
+        </div>
+        <h3 class="font-display text-2xl font-bold text-white mb-3">
+          PhD Student<br/>
+          <span class="text-indigo-300">Computational Biology PhD Program · UVA</span>
+        </h3>
+        <p class="text-slate-300 text-sm leading-relaxed max-w-3xl mb-6">
+          We are actively recruiting PhD students. Prospective students should apply through the <strong class="text-white">UVA Computational Biology PhD Program</strong> and are strongly encouraged to reach out directly beforehand to discuss research interests and fit.
+        </p>
+        <div class="flex flex-wrap gap-5 text-sm text-slate-300 mb-7">
+          <span class="flex items-center gap-2"><span class="text-indigo-400 text-base">📍</span> Charlottesville, VA (UVA)</span>
+          <span class="flex items-center gap-2"><span class="text-indigo-400 text-base">🎓</span> Apply via UVA Comp Bio PhD Program</span>
+        </div>
+        <div class="flex flex-wrap gap-4">
+          <a href="https://biomed.virginia.edu/phd-programs/computational-biology" target="_blank"
+             class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-indigo-500/20">
+            UVA Comp Bio PhD Program ↗
+          </a>
+          <a href="mailto:tchu@uva.edu"
+             class="inline-flex items-center gap-2 px-6 py-3 border border-indigo-500/40 hover:border-indigo-400 text-indigo-300 hover:text-indigo-200 font-semibold rounded-xl transition-colors">
+            Get in Touch
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Research directions -->
+    <div class="bg-[#0d1425]/60 border border-slate-800/60 rounded-2xl p-7 mb-6" data-aos="fade-up">
+      <h4 class="font-display text-lg font-semibold text-white mb-5">Research Directions</h4>
+      <div class="space-y-4">
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full bg-sky-500/20 border border-sky-500/30 flex-shrink-0 flex items-center justify-center text-sky-300 font-bold text-sm">1</div>
+          <p class="text-slate-300 text-sm leading-relaxed pt-1">
+            <strong class="text-sky-300">Bayesian Transcriptome Deconvolution and Gene Regulation</strong> — extending BayesPrism (the most-cited primary research paper in <em>Nature Cancer</em> since 2022) into next-generation architectures that integrate eQTL modeling to characterize cell type-specific genetic effects, cis-eQTL programs, and gene regulatory networks from bulk and single-cell data.
+          </p>
+        </div>
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex-shrink-0 flex items-center justify-center text-indigo-300 font-bold text-sm">2</div>
+          <p class="text-slate-300 text-sm leading-relaxed pt-1">
+            <strong class="text-indigo-300">Spatial Transcriptomics and Cell–Cell Interaction Modeling</strong> — mapping cell-type composition and gene expression across tissue space (SpaceFold, PrismSpot) and developing deep learning frameworks to model ligand–receptor signaling, paracrine communication, and niche-dependent gene regulation in complex microenvironments.
+          </p>
+        </div>
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex-shrink-0 flex items-center justify-center text-emerald-300 font-bold text-sm">3</div>
+          <p class="text-slate-300 text-sm leading-relaxed pt-1">
+            <strong class="text-emerald-300">Cell-free RNA and Liquid Biopsy</strong> — inferring cell-type origin from cfRNA in blood and urine to enable non-invasive monitoring of organ-specific damage, with translational applications in transplant rejection, early cancer detection, and inflammatory disease; integrating cfRNA with cfDNA and clinical variables for multimodal diagnostics.
+          </p>
+        </div>
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500/30 flex-shrink-0 flex items-center justify-center text-orange-300 font-bold text-sm">4</div>
+          <p class="text-slate-300 text-sm leading-relaxed pt-1">
+            <strong class="text-orange-300">Modeling the Dynamics of Cell State Transitions</strong> — physics-informed neural networks and Neural ODE frameworks that learn governing dynamics of gene regulatory networks from time-series and perturbation data (CRISPRi/a, cytokines, spatial gradients), with the ultimate goal of identifying causal regulators of cell fate and enabling rational <em>in silico</em> perturbation design.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Qualifications 2-col -->
+    <div class="grid md:grid-cols-2 gap-5 mb-6" data-aos="fade-up">
+      <div class="bg-[#0d1425]/60 border border-slate-800/60 rounded-2xl p-7">
+        <h4 class="font-display text-lg font-semibold text-white mb-4">Required</h4>
+        <ul class="space-y-2 text-slate-300 text-sm">
+          <li class="flex gap-2.5 items-start">
+            <span class="text-sky-400 font-bold mt-0.5">→</span>
+            Ph.D. in Computer Science, Applied Mathematics, Statistics, Computational Biology, Biophysics, Engineering, or related quantitative discipline (in hand by start date)
+          </li>
+        </ul>
+      </div>
+      <div class="bg-[#0d1425]/60 border border-slate-800/60 rounded-2xl p-7">
+        <h4 class="font-display text-lg font-semibold text-white mb-4">Preferred</h4>
+        <ul class="space-y-2 text-slate-300 text-sm">
+          <li class="flex gap-2.5 items-start"><span class="text-indigo-400 font-bold mt-0.5">→</span> Strong math / statistics foundation</li>
+          <li class="flex gap-2.5 items-start"><span class="text-indigo-400 font-bold mt-0.5">→</span> Proficiency in PyTorch (or equivalent) and Python / R</li>
+          <li class="flex gap-2.5 items-start"><span class="text-indigo-400 font-bold mt-0.5">→</span> At least one peer-reviewed publication in prior research area</li>
+          <li class="flex gap-2.5 items-start"><span class="text-indigo-400 font-bold mt-0.5">→</span> Genuine curiosity for biological problems through quantitative approaches — <em>prior biology experience not required</em></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Mentorship 4-grid -->
+    <div class="bg-[#0d1425]/60 border border-slate-800/60 rounded-2xl p-7 mb-6" data-aos="fade-up">
+      <h4 class="font-display text-lg font-semibold text-white mb-5">Mentorship &amp; Career Development</h4>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div class="flex gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-sky-500/12 border border-sky-500/20 flex-shrink-0 flex items-center justify-center text-lg">🤝</div>
+          <div>
+            <p class="text-white font-semibold text-sm">Mentorship as Collaboration</p>
+            <p class="text-slate-400 text-xs mt-1 leading-relaxed">Our philosophy: trainees are collaborators, not assistants. Expect direct technical engagement in algorithm and model development, genuine intellectual exchange, and co-ownership of the science.</p>
+          </div>
+        </div>
+        <div class="flex gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/12 border border-indigo-500/20 flex-shrink-0 flex items-center justify-center text-lg">🔭</div>
+          <div>
+            <p class="text-white font-semibold text-sm">Scientific Independence</p>
+            <p class="text-slate-400 text-xs mt-1 leading-relaxed">Freedom to develop and lead your own research directions, supported by the Chu Lab's resources. Independent ideas are actively encouraged — the lab's research agenda is a starting point, not a ceiling.</p>
+          </div>
+        </div>
+        <div class="flex gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/12 border border-emerald-500/20 flex-shrink-0 flex items-center justify-center text-lg">✍️</div>
+          <div>
+            <p class="text-white font-semibold text-sm">Grant Writing Training</p>
+            <p class="text-slate-400 text-xs mt-1 leading-relaxed">Active support for independent fellowship and grant applications — from identifying the right opportunities to polishing the final submission.</p>
+          </div>
+        </div>
+        <div class="flex gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-orange-500/12 border border-orange-500/20 flex-shrink-0 flex items-center justify-center text-lg">🎤</div>
+          <div>
+            <p class="text-white font-semibold text-sm">Conference Visibility</p>
+            <p class="text-slate-400 text-xs mt-1 leading-relaxed">Full travel support to present at top venues in computational biology and machine learning, and active help building your professional network across academia and industry.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Apply -->
+    <div id="how-to-apply" class="relative overflow-hidden rounded-2xl border border-sky-500/20 p-8"
+         style="background: linear-gradient(135deg, rgba(8,30,50,0.8), rgba(10,15,35,0.9));"
+         data-aos="fade-up">
+      <h4 class="font-display text-xl font-semibold text-white mb-4">How to Apply</h4>
+      <p class="text-slate-300 text-sm mb-5">
+        Send an email to
+        <a href="mailto:tchu@uva.edu?subject=Postdoc Application — [Your Name]" class="text-sky-400 hover:underline font-medium">tchu@uva.edu</a>
+        with subject line <code class="bg-slate-800 px-2 py-0.5 rounded text-sky-300 text-xs">"Postdoc Application — [Your Name]"</code>, including:
+      </p>
+      <ol class="space-y-2.5 text-slate-300 text-sm mb-7">
+        <li class="flex gap-3 items-start">
+          <span class="text-sky-400 font-bold text-base leading-tight">1.</span>
+          A cover letter describing your research experience, interests, and career goals
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="text-sky-400 font-bold text-base leading-tight">2.</span>
+          Your current CV
+        </li>
+        <li class="flex gap-3 items-start">
+          <span class="text-sky-400 font-bold text-base leading-tight">3.</span>
+          Contact information for 2 references
+        </li>
+      </ol>
+      <a href="mailto:tchu@uva.edu?subject=Postdoc Application — [Your Name]"
+         class="inline-flex items-center gap-2.5 px-6 py-3 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-sky-500/20">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        tchu@uva.edu
+      </a>
+      <p class="text-slate-600 text-xs mt-4">The University of Virginia is an equal opportunity employer. All qualified applicants will receive consideration without regard to race, color, religion, sex, national origin, disability, or veteran status. Visa sponsorship available for qualified candidates.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════════════════════════════════ CONTACT + FUNDING ═══════════════════════════════════ -->
+<section id="contact" class="py-20 bg-[#060b18]">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid md:grid-cols-2 gap-14">
+
+      <!-- Contact -->
+      <div data-aos="fade-right">
+        <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">Get in Touch</p>
+        <h2 class="font-display text-3xl font-bold text-white mb-7">Contact</h2>
+        <div class="space-y-5 text-sm">
+          <div>
+            <p class="text-slate-600 text-xs uppercase tracking-wider mb-1.5">Email</p>
+            <a href="mailto:tchu@uva.edu" class="text-sky-400 hover:underline font-medium">tchu@uva.edu</a>
+          </div>
+          <div>
+            <p class="text-slate-600 text-xs uppercase tracking-wider mb-1.5">Address</p>
+            <p class="text-slate-300 leading-relaxed">
+              Department of Genome Sciences<br/>
+              University of Virginia School of Medicine<br/>
+              Charlottesville, VA 22908
+            </p>
+          </div>
+          <div>
+            <p class="text-slate-600 text-xs uppercase tracking-wider mb-1.5">Profiles</p>
+            <div class="flex flex-col gap-1.5">
+              <a href="https://scholar.google.co.uk/citations?user=0O-NG5YAAAAJ&hl=en" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">Google Scholar ↗</a>
+              <a href="https://orcid.org/0000-0003-3369-6692" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">ORCID 0000-0003-3369-6692 ↗</a>
+              <a href="https://med.virginia.edu/faculty/faculty-listing/abk7af/" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">UVA Faculty Page ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Funding -->
+      <div data-aos="fade-left">
+        <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.2em] mb-3">Support</p>
+        <h2 class="font-display text-3xl font-bold text-white mb-7">Funding</h2>
+        <div class="space-y-4">
+          <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-9 h-9 rounded-lg bg-blue-500/20 border border-blue-500/20 flex items-center justify-center text-blue-300 font-bold text-xs">NIH</div>
+              <span class="text-white font-semibold text-sm">R00 Pathway to Independence Award</span>
+            </div>
+            <p class="text-slate-500 text-xs leading-relaxed">
+              National Human Genome Research Institute (NHGRI) · R00HG013429 ·
+              <em>Computational Modeling of the Interplay between External Signaling and Transcription Rewiring using Spatial Transcriptomics and Single Cell Multiome Data</em>
+            </p>
+          </div>
+          <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-9 h-9 rounded-lg bg-orange-500/20 border border-orange-500/20 flex items-center justify-center text-orange-300 font-bold text-xs">UVA</div>
+              <span class="text-white font-semibold text-sm">UVA Institutional Startup Funding</span>
+            </div>
+            <p class="text-slate-500 text-xs">University of Virginia School of Medicine · Department of Genome Sciences</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+<footer class="bg-[#040810] border-t border-slate-900/60 py-8">
+  <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="text-slate-600 text-sm">
+      <span class="gradient-text font-display font-bold text-base">Chu Lab</span>
+      <span class="ml-2">· Department of Genome Sciences · University of Virginia</span>
+    </div>
+    <div class="flex gap-6 text-slate-700 text-xs">
+      <a href="#research"     class="hover:text-slate-400 transition-colors">Research</a>
+      <a href="#publications" class="hover:text-slate-400 transition-colors">Publications</a>
+      <a href="#software"     class="hover:text-slate-400 transition-colors">Software</a>
+      <a href="#team"         class="hover:text-slate-400 transition-colors">Team</a>
+      <a href="#join"         class="hover:text-slate-400 transition-colors">Join Us</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════ SCRIPTS ═══════════════════════════════════ -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init({ once: true, offset: 70, duration: 650, easing: 'ease-out-cubic' });
+
+  // Nav: transparent → solid on scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 60) {
+      navbar.style.background = 'rgba(8,14,29,0.96)';
+      navbar.style.boxShadow = '0 1px 24px rgba(0,0,0,0.5)';
+    } else {
+      navbar.style.background = 'transparent';
+      navbar.style.boxShadow = 'none';
+    }
+  }, { passive: true });
+
+  // Mobile menu
+  document.getElementById('menu-btn').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  });
+  document.querySelectorAll('#mobile-menu a').forEach(a =>
+    a.addEventListener('click', () => document.getElementById('mobile-menu').classList.add('hidden'))
+  );
+</script>
+</body>
+</html>
